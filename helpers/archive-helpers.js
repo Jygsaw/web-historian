@@ -25,22 +25,31 @@ exports.initialize = function(pathsObj){
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(asyncOn, callback){
+exports.readListOfUrls = function(asyncOn, dataProcessor){
   if (asyncOn) {
+    console.log("async readListOfUrls");
     fs.readFile('../archives/sites.txt', 'utf8', function(err, data) {
       if(err) {
         throw err;
       } else {
-        callback(parseSiteIndex(data));
+        dataProcessor(parseSiteIndex(data));
       }
     });
   } else {
+    console.log("sync readListOfUrls");
     var data = fs.readFileSync('../archives/sites.txt', 'utf8');
-    callback(parseSiteIndex(data));
+    dataProcessor(parseSiteIndex(data));
   }
 };
 
-exports.isUrlInList = function(){
+exports.isUrlInList = function(url){
+  console.log("===== isUrlInList() =====");
+  var urlList = null;
+  this.readListOfUrls(false, function(data) {
+    console.log(data);
+    urlList = data;
+  });
+  return urlList.hasOwnProperty(url);
 };
 
 exports.addUrlToList = function(){
@@ -64,5 +73,6 @@ var parseSiteIndex = function(data) {
   _(data.split('\n')).each(function(elem) {
     result[elem] = true;
   });
+  delete result[''];
   return result;
 };
