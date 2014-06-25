@@ -25,7 +25,14 @@ exports.initialize = function(pathsObj){
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(){
+exports.readListOfUrls = function(callback){
+  fs.readFile('../archives/sites.txt', function(err, data) {
+    if(err) {
+      throw err;
+    } else {
+      callback(parseSiteIndex(data));
+    }
+  });
 };
 
 exports.isUrlInList = function(){
@@ -38,4 +45,20 @@ exports.isURLArchived = function(){
 };
 
 exports.downloadUrls = function(){
+};
+
+//
+// parse file buffer data into index of site urls
+// params:
+// - buffer data
+// return:
+// - object with index = site url
+//
+var parseSiteIndex = function(data) {
+  var result = {};
+  _(data.toString('utf8').split('\n')).each(function(elem) {
+    result[elem] = true;
+  });
+  console.log(result);
+  return result;
 };
