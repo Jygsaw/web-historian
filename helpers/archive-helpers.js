@@ -27,7 +27,6 @@ exports.initialize = function(pathsObj){
 
 exports.readListOfUrls = function(asyncOn, dataProcessor){
   if (asyncOn) {
-    console.log("async readListOfUrls");
     fs.readFile('../archives/sites.txt', 'utf8', function(err, data) {
       if(err) {
         throw err;
@@ -36,14 +35,12 @@ exports.readListOfUrls = function(asyncOn, dataProcessor){
       }
     });
   } else {
-    console.log("sync readListOfUrls");
     var data = fs.readFileSync('../archives/sites.txt', 'utf8');
     dataProcessor(parseSiteIndex(data));
   }
 };
 
 exports.isUrlInList = function(url){
-  console.log("===== isUrlInList() =====");
   var urlList = null;
   this.readListOfUrls(false, function(data) {
     console.log(data);
@@ -52,7 +49,12 @@ exports.isUrlInList = function(url){
   return urlList.hasOwnProperty(url);
 };
 
-exports.addUrlToList = function(){
+exports.addUrlToList = function(url){
+  if (!this.isUrlInList(url)) {
+    fs.appendFile('../archives/sites.txt', url + '\n', 'utf8', function(err) {
+      if (err) { throw err; }
+    });
+  }
 };
 
 exports.isURLArchived = function(){
