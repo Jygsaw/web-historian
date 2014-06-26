@@ -57,10 +57,15 @@ exports.addUrlToList = function(url){
   }
 };
 
-exports.isURLArchived = function(){
+exports.isUrlArchived = function(url){
+  var archiveFiles = fs.readdirSync(this.paths.archivedSites);
+  return _(archiveFiles).contains(url);
 };
 
-exports.downloadUrls = function(){
+exports.downloadUrls = function(url){
+  console.log("===== downloadUrls =====");
+  console.log(url);
+
 };
 
 //
