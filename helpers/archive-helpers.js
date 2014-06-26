@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var http_request = require('http-request');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -27,7 +28,7 @@ exports.initialize = function(pathsObj){
 
 exports.readListOfUrls = function(asyncOn, dataProcessor){
   if (asyncOn) {
-    fs.readFile('../archives/sites.txt', 'utf8', function(err, data) {
+    fs.readFile(this.paths.list, 'utf8', function(err, data) {
       if(err) {
         throw err;
       } else {
@@ -35,7 +36,7 @@ exports.readListOfUrls = function(asyncOn, dataProcessor){
       }
     });
   } else {
-    var data = fs.readFileSync('../archives/sites.txt', 'utf8');
+    var data = fs.readFileSync(this.paths.list, 'utf8');
     dataProcessor(parseSiteIndex(data));
   }
 };
@@ -43,7 +44,6 @@ exports.readListOfUrls = function(asyncOn, dataProcessor){
 exports.isUrlInList = function(url){
   var urlList = null;
   this.readListOfUrls(false, function(data) {
-    console.log(data);
     urlList = data;
   });
   return urlList.hasOwnProperty(url);
@@ -51,7 +51,7 @@ exports.isUrlInList = function(url){
 
 exports.addUrlToList = function(url){
   if (!this.isUrlInList(url)) {
-    fs.appendFile('../archives/sites.txt', url + '\n', 'utf8', function(err) {
+    fs.appendFile(this.paths.list, url + '\n', 'utf8', function(err) {
       if (err) { throw err; }
     });
   }
@@ -62,10 +62,14 @@ exports.isUrlArchived = function(url){
   return _(archiveFiles).contains(url);
 };
 
-exports.downloadUrls = function(url){
-  console.log("===== downloadUrls =====");
-  console.log(url);
-
+exports.downloadUrls = function(){
+  this.readListOfUrls(true, function(data) {
+    for(var url in data) {
+      if (!exports.isUrlArchived(url)) {
+        archiveSite(url);
+      }
+    }
+  });
 };
 
 //
@@ -82,4 +86,21 @@ var parseSiteIndex = function(data) {
   });
   delete result[''];
   return result;
+};
+
+//
+// scrapes html and writes to disk
+// params:
+// - url
+// returns:
+// - nothing
+//
+var archiveSite = function(url) {
+  http_request.get(url, function(err, res) {
+    if (err) { throw err; }
+    var filePath = exports.paths.archivedSites + '/' + url;
+    fs.writeFile(filePath, res.buffer.toString('utf8'), function(err) {
+      if(err) { throw err; }
+    });
+  });
 };
