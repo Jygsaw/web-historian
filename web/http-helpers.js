@@ -38,3 +38,14 @@ exports.sendResponse = function(res, data, statusCode) {
   res.writeHead(statusCode, this.headers);
   res.end(data);
 };
+
+
+exports.collectData = function(request, callback) {
+  var data = '';
+  request.on('data', function(chunk) {
+    data += chunk;
+  });
+  request.on('end', function() {
+    callback(data);
+  });
+};
