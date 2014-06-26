@@ -26,27 +26,19 @@ exports.initialize = function(pathsObj){
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(asyncOn, dataProcessor){
-  if (asyncOn) {
-    fs.readFile(this.paths.list, 'utf8', function(err, data) {
-      if(err) {
-        throw err;
-      } else {
-        dataProcessor(parseSiteIndex(data));
-      }
-    });
-  } else {
-    var data = fs.readFileSync(this.paths.list, 'utf8');
-    dataProcessor(parseSiteIndex(data));
-  }
+exports.readListOfUrls = function(callback){
+  fs.readFile(this.paths.list, 'utf8', function(err, data) {
+    if(err) { throw err; }
+    var list = parseSiteIndex(data);
+    callback(list);
+  });
 };
 
-exports.isUrlInList = function(url){
-  var urlList = null;
-  this.readListOfUrls(false, function(data) {
-    urlList = data;
+exports.isUrlInList = function(url, callback){
+  this.readListOfUrls(function(list) {
+    var bool = list.hasOwnProperty(url);
+    callback(bool);
   });
-  return urlList.hasOwnProperty(url);
 };
 
 exports.addUrlToList = function(url){
@@ -66,7 +58,7 @@ exports.isUrlArchived = function(url, callback){
 };
 
 exports.downloadUrls = function(){
-  this.readListOfUrls(true, function(data) {
+  this.readListOfUrls(function(data) {
     for(var url in data) {
       exports.isUrlArchived(url, function(bool) {
         if (!bool) {
@@ -101,7 +93,6 @@ var parseSiteIndex = function(data) {
 // - nothing
 //
 var archiveSite = function(url) {
-  console.log(">>>>> archiveSite() <<<<<");
   http_request.get(url, function(err, res) {
     if (err) { throw err; }
     var filePath = exports.paths.archivedSites + '/' + url;
