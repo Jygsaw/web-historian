@@ -60,11 +60,13 @@ exports.isUrlArchived = function(url, callback){
 exports.downloadUrls = function(){
   this.readListOfUrls(function(data) {
     for(var url in data) {
-      exports.isUrlArchived(url, function(bool) {
-        if (!bool) {
-          archiveSite(url);
-        }
-      });
+      (function(url) {
+        exports.isUrlArchived(url, function(bool) {
+          if (!bool) {
+            archiveSite(url);
+          }
+        });
+      })(url);
     }
   });
 };
