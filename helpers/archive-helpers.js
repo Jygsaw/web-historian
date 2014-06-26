@@ -42,11 +42,13 @@ exports.isUrlInList = function(url, callback){
 };
 
 exports.addUrlToList = function(url){
-  if (!this.isUrlInList(url)) {
-    fs.appendFile(this.paths.list, url + '\n', 'utf8', function(err) {
-      if (err) { throw err; }
-    });
-  }
+  this.isUrlInList(url, function(bool) {
+    if (!bool) {
+      fs.appendFile(exports.paths.list, url + '\n', 'utf8', function(err) {
+        if (err) { throw err; }
+      });
+    }
+  });
 };
 
 exports.isUrlArchived = function(url, callback){
