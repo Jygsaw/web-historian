@@ -25,6 +25,11 @@ exports.handleRequest = function (req, res) {
   };
   handlerFuncs.POST = function() {
     console.log("=== POST request ===");
+    http.collectData(req, function(data) {
+      var url = data.split("=")[1];
+      console.log("URL: ", url);
+      archive.addUrlToList(url);
+    });
     statusCode = 302;
   };
 
