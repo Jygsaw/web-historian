@@ -57,17 +57,22 @@ exports.addUrlToList = function(url){
   }
 };
 
-exports.isUrlArchived = function(url){
-  var archiveFiles = fs.readdirSync(this.paths.archivedSites);
-  return _(archiveFiles).contains(url);
+exports.isUrlArchived = function(url, callback){
+  fs.readdir(this.paths.archivedSites, function(err, files) {
+    if(err) { throw err; }
+    var result = _(files).contains(url);
+    callback(result);
+  });
 };
 
 exports.downloadUrls = function(){
   this.readListOfUrls(true, function(data) {
     for(var url in data) {
-      if (!exports.isUrlArchived(url)) {
-        archiveSite(url);
-      }
+      exports.isUrlArchived(url, function(bool) {
+        if (!bool) {
+          archiveSite(url);
+        }
+      });
     }
   });
 };
@@ -96,6 +101,7 @@ var parseSiteIndex = function(data) {
 // - nothing
 //
 var archiveSite = function(url) {
+  console.log(">>>>> archiveSite() <<<<<");
   http_request.get(url, function(err, res) {
     if (err) { throw err; }
     var filePath = exports.paths.archivedSites + '/' + url;
