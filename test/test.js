@@ -88,18 +88,21 @@ describe("Node Server Request Listener Function", function() {
 describe("html fetcher helpers", function(){
 
   it("should have a 'readListOfUrls' function", function(done){
-    var urlArray = ["example1.com", "example2.com"];
-    var resultArray;
+    var urlHash = {
+      "example1.com": true,
+      "example2.com": true
+    };
+    var resultHash;
 
-    fs.writeFileSync(archive.paths.list, urlArray.join("\n"));
+    fs.writeFileSync(archive.paths.list, Object.keys(urlHash).join("\n"));
     archive.readListOfUrls(function(urls){
-      resultArray = urls;
+      resultHash = urls;
     });
 
     waitForThen(
-      function() { return resultArray; },
+      function() { return resultHash; },
       function(){
-        expect(resultArray).to.deep.equal(urlArray);
+        expect(resultHash).to.deep.equal(urlHash);
         done();
     });
   });
