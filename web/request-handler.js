@@ -5,15 +5,12 @@ var url = require('url');
 // require more modules/folders here!
 
 exports.handleRequest = function (req, res) {
-  console.log("HELLO: " + req.method);
-  console.log("URL: ", req.url);
 
   var statusCode = null;
   var data = null;
 
   var handlerFuncs = {};
   handlerFuncs.GET = function() {
-    console.log("=== GET request ===");
     statusCode = 200;
     if (req.url === '/') {
       data = archive.paths.siteAssets + '/index.html';
@@ -22,13 +19,21 @@ exports.handleRequest = function (req, res) {
     } else {
       data = archive.paths.siteAssets + req.url;
     }
+    http.serveAssets(res, data, statusCode);
   };
   handlerFuncs.POST = function() {
-    console.log("=== POST request ===");
     http.collectData(req, function(data) {
       var url = data.split("=")[1];
-      console.log("URL: ", url);
       archive.addUrlToList(url);
+
+      archive.isUrlArchived(url, function(bool) {
+        if (bool) {
+          data = archive.paths.archivedSites + '/' + url;
+        } else {
+          data = archive.paths.siteAssets + '/loading.html';
+        }
+        http.serveAssets(res, data, statusCode);
+      });
     });
     statusCode = 302;
   };
@@ -39,6 +44,4 @@ exports.handleRequest = function (req, res) {
     statusCode = 500;
   }
 
-  // res.writeHead(statusCode, http.headers);
-  http.serveAssets(res, data, statusCode);
 };
