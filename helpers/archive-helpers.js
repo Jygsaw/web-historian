@@ -98,10 +98,12 @@ var parseSiteIndex = function(data) {
 //
 var archiveSite = function(url) {
   http_request.get(url, function(err, res) {
-    if (err) { throw err; }
-    var filePath = exports.paths.archivedSites + '/' + url;
-    fs.writeFile(filePath, res.buffer.toString('utf8'), function(err) {
-      if(err) { throw err; }
-    });
+    if (err) { console.log(err); }
+    if (!err) {
+      var filePath = exports.paths.archivedSites + '/' + url;
+      fs.writeFile(filePath, res.buffer.toString('utf8'), function(err) {
+        if(err) { throw err; }
+      });
+    }
   });
 };
